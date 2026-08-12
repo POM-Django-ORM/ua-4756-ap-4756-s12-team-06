@@ -1,5 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 
 ROLE_CHOICES = (
     (0, 'visitor'),
@@ -54,10 +56,15 @@ class CustomUser(AbstractBaseUser):
                  user role, user is_active
         """
         return (
-            f"{self.id} {self.first_name} {self.middle_name} "
-            f"{self.last_name} {self.email} {self.password} "
-            f"{self.updated_at} {self.created_at} "
-            f"{self.role} {self.is_active}"
+            f"'id': {self.id}, "
+            f"'first_name': '{self.first_name}', "
+            f"'middle_name': '{self.middle_name}', "
+            f"'last_name': '{self.last_name}', "
+            f"'email': '{self.email}', "
+            f"'created_at': {int(self.created_at.timestamp())}, "
+            f"'updated_at': {int(self.updated_at.timestamp())}, "
+            f"'role': {self.role}, "
+            f"'is_active': {self.is_active}"
         )
 
     def __repr__(self):
@@ -121,6 +128,23 @@ class CustomUser(AbstractBaseUser):
         :type password: str
         :return: a new user object which is also written into the DB
         """
+        if CustomUser.get_by_email(email) is not None:
+            return None
+
+        if first_name is not None and len(first_name) > 20:
+            return None
+
+        if middle_name is not None and len(middle_name) > 20:
+            return None
+
+        if last_name is not None and len(last_name) > 20:
+            return None
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            return None
+
         user = CustomUser(
             email=email,
             first_name=first_name,
