@@ -25,7 +25,15 @@ class Book(models.Model):
         Magic method is redefined to show all information about Book.
         :return: book id, book name, book description, book count, book authors
         """
-        return f"{self.id} {self.name} {self.description} {self.count} {list(self.authors.all())}"
+        authors = [author.id for author in self.authors.all()]
+
+        return (
+            f"'id': {self.id}, "
+            f"'name': '{self.name}', "
+            f"'description': '{self.description}', "
+            f"'count': {self.count}, "
+            f"'authors': {authors}"
+        )
 
     def __repr__(self):
         """
@@ -73,6 +81,9 @@ class Book(models.Model):
         type authors: list->Author
         :return: a new book object which is also written into the DB
         """
+        if len(name) > 128:
+            return None
+
         book = Book.objects.create(
             name=name,
             description=description,
@@ -147,4 +158,4 @@ class Book(models.Model):
         """
         returns data for json request with QuerySet of all books
         """
-        return Book.objects.all()
+        return list(Book.objects.all())
