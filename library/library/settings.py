@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'book',
     'order'
 ]
+AUTH_USER_MODEL = 'authentication.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -155,6 +156,8 @@ LOGGING = {
         },
     },
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 try:
     from .local_settings import *
 except ImportError:
