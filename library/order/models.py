@@ -15,8 +15,12 @@ class Order(models.Model):
         :return: book id, book name, book description, book count, book authors
         """
         return (
-            f"{self.id} {self.book.id} {self.user.id} "
-            f"{self.created_at} {self.end_at} {self.plated_end_at}"
+            f"'id': {self.id}, "
+            f"'user': {repr(self.user)}, "
+            f"'book': {repr(self.book)}, "
+            f"'created_at': '{self.created_at}', "
+            f"'end_at': {None if self.end_at is None else repr(str(self.end_at))}, "
+            f"'plated_end_at': '{self.plated_end_at}'"
         )
 
     def __repr__(self):
@@ -59,6 +63,20 @@ class Order(models.Model):
         :type plated_end_at: int (timestamp)
         :return: a new order object which is also written into the DB
         """
+        if user is None or user.pk is None:
+            return None
+
+        if book is None or book.pk is None:
+            return None
+
+        active_orders = Order.objects.filter(
+            book=book,
+            end_at__isnull=True
+        ).count()
+
+        if active_orders >= book.count:
+            return None
+
         return Order.objects.create(
             user=user,
             book=book,
@@ -99,14 +117,14 @@ class Order(models.Model):
         """
         :return: all orders
         """
-        return Order.objects.all()
+        return list(Order.objects.all())
 
     @staticmethod
     def get_not_returned_books():
         """
         :return:  all orders that do not have a return date (end_at)
         """
-        return Order.objects.filter(end_at__isnull=True)
+        return list(Order.objects.filter(end_at__isnull=True))
 
     @staticmethod
     def delete_by_id(order_id):
