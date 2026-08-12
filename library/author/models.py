@@ -23,7 +23,12 @@ class Author(models.Model):
         Magic method is redefined to show all information about Author.
         :return: author id, author name, author surname, author patronymic
         """
-        return f"{self.id} {self.name} {self.surname} {self.patronymic}"
+        return (
+            f"'id': {self.id}, "
+            f"'name': '{self.name}', "
+            f"'surname': '{self.surname}', "
+            f"'patronymic': '{self.patronymic}'"
+        )
 
     def __repr__(self):
         """
@@ -69,6 +74,9 @@ class Author(models.Model):
         type patronymic: str max_length=20
         :return: a new author object which is also written into the DB
         """
+        if len(name) > 20 or len(surname) > 20 or len(patronymic) > 20:
+            return None
+
         return Author.objects.create(
             name=name,
             surname=surname,
@@ -108,12 +116,18 @@ class Author(models.Model):
         :return: None
         """
         if name is not None:
+            if len(name) > 20:
+                return None
             self.name = name
 
         if surname is not None:
+            if len(surname) > 20:
+                return None
             self.surname = surname
 
         if patronymic is not None:
+            if len(patronymic) > 20:
+                return None
             self.patronymic = patronymic
 
         self.save()
